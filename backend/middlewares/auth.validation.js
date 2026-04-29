@@ -24,3 +24,20 @@ export const validateSignup = (req, res, next) => {
 
   next();
 };
+
+export const validateLogin = (req, res, next) => {
+  const { email, password } = req.body;
+
+  if (!email || !password) {
+    return res.status(400).json({ message: "All fields are required" });
+  }
+
+  const emailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
+  const emailValid = emailRegex.test(email.toLowerCase().trim());
+
+  if (!emailValid) {
+    return res.status(400).json({ message: "Invalid email format" });
+  }
+
+  next();
+};

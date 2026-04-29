@@ -7,13 +7,16 @@ import {
   signup,
   updateProfile,
 } from "../controllers/auth.controller.js";
-import { validateSignup } from "../middlewares/auth.validation.js";
+import {
+  validateLogin,
+  validateSignup,
+} from "../middlewares/auth.validation.js";
 
 const router = express.Router();
 
 router.get("/profile", protectRoute, getUserProfile);
 router.post("/signup", validateSignup, signup);
-router.post("/login", login);
+router.post("/login", validateLogin, login);
 router.post("/logout", logout);
 router.post("/update-profile", protectRoute, updateProfile);
 
