@@ -1,5 +1,5 @@
-export const getUserProfile = async () => {};
-export const signup = async () => {};
-export const login = async () => {};
-export const logout = async () => {};
-export const updateProfile = async () => {};
+export const getUserProfile = async (req, res) => {};
+export const signup = async (req, res) => {};
+export const login = async (req, res) => {};
+export const logout = async (req, res) => {};
+export const updateProfile = async (req, res) => {};
