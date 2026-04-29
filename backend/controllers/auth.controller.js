@@ -35,7 +35,48 @@ export const signup = async (req, res) => {
   }
 };
 
-export const login = async (req, res) => {};
+export const login = async (req, res) => {
+  const { email, password } = req.body;
+
+  const n = {
+    email: email.toLowerCase().trim(),
+  };
+
+  try {
+    // Existing user check
+    const result = await db.query(
+      `
+      SELECT * 
+      FROM users
+      WHERE email = $1
+      `,
+      [n.email],
+    );
+
+    const user = result.rows[0];
+
+    if (!user) {
+      return res.status(400).json({ message: "Invalid email or password" });
+    }
+
+    // Correct password check
+    const isMatch = await bcrypt.compare(password, user.password);
+
+    if (!isMatch) {
+      return res.status(400).json({ message: "Invalid email or password" });
+    }
+
+    setAuthToken(user.id, res);
+
+    const { password: p, ...safeUser } = user;
+
+    res.status(200).json({ message: "Login successful", user: safeUser });
+  } catch (error) {
+    console.error("login controller error:", error);
+    res.status(500).json({ message: "Server Error" });
+  }
+};
+
 export const logout = async (req, res) => {};
 export const updateProfile = async (req, res) => {};
 
