@@ -77,7 +77,16 @@ export const login = async (req, res) => {
   }
 };
 
-export const logout = async (req, res) => {};
+export const logout = async (req, res) => {
+  res.clearCookie("authToken", {
+    httpOnly: true,
+    secure: ENV.NODE_ENV === "production",
+    sameSite: "strict",
+  });
+
+  res.status(200).json({ message: "Logout successful" });
+};
+
 export const updateProfile = async (req, res) => {};
 
 // Helpers
