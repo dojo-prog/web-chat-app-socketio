@@ -93,7 +93,12 @@ export const getMessagesByUserId = async (req, res) => {
 
     const messages = result.rows.reverse();
 
-    res.status(200).json({ messages });
+    res
+      .status(200)
+      .json({
+        messages,
+        nextCursor: messages.length ? messages[0].created_at : null,
+      });
   } catch (error) {
     console.error("getMessagesByUserId controller error:", error);
     res.status(500).json({ message: "Server Error" });
