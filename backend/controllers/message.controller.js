@@ -68,5 +68,36 @@ export const getUserContactList = async (req, res) => {
   }
 };
 
-export const getMessagesByUserId = async (req, res) => {};
+export const getMessagesByUserId = async (req, res) => {
+  const user = req.user;
+  const { userId } = req.params;
+
+  if (!userId) {
+    return res.status(400).json({ message: "No user ID provided" });
+  }
+
+  try {
+    const result = await db.query(
+      `
+      SELECT * FROM messages
+      WHERE (
+        senderId = $1 AND receiverId = $2
+      ) OR (
+       receiverId = $1 AND senderId = $2
+      )
+      ORDER BY created_at DESC
+      LIMIT 15;
+      `,
+      [user.id, userId],
+    );
+
+    const messages = result.rows.reverse();
+
+    res.status(200).json({ messages });
+  } catch (error) {
+    console.error("getMessagesByUserId controller error:", error);
+    res.status(500).json({ message: "Server Error" });
+  }
+};
+
 export const sendMessage = async (req, res) => {};
