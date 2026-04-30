@@ -85,7 +85,7 @@ export const getMessagesByUserId = async (req, res) => {
       ) OR (
        receiverId = $1 AND senderId = $2
       )
-      ORDER BY created_at DESC
+      ORDER BY created_at DESC, id DESC
       LIMIT 15;
       `,
       [user.id, userId],
@@ -93,12 +93,12 @@ export const getMessagesByUserId = async (req, res) => {
 
     const messages = result.rows.reverse();
 
-    res
-      .status(200)
-      .json({
-        messages,
-        nextCursor: messages.length ? messages[0].created_at : null,
-      });
+    const last = messages[0];
+
+    res.status(200).json({
+      messages,
+      nextCursor: last ? { created_at: last.created_at, id: last.id } : null,
+    });
   } catch (error) {
     console.error("getMessagesByUserId controller error:", error);
     res.status(500).json({ message: "Server Error" });
@@ -108,17 +108,17 @@ export const getMessagesByUserId = async (req, res) => {
 export const getNextMessagesByUserId = async (req, res) => {
   const user = req.user;
   const { userId } = req.params;
-  const { cursor } = req.query;
+  const { created_at, id: cursorId } = req.query;
 
   if (!userId) {
     return res.status(400).json({ message: "No user ID provided" });
   }
 
-  if (!cursor) {
+  if (!created_at || !cursorId) {
     return res.status(400).json({ message: "No cursor provided" });
   }
 
-  if (isNaN(Date.parse(cursor))) {
+  if (isNaN(Date.parse(created_at))) {
     return res.status(400).json({ message: "Invalid cursor" });
   }
 
@@ -131,18 +131,23 @@ export const getNextMessagesByUserId = async (req, res) => {
         OR  
         (receiverId = $1 AND senderId = $2)
       ) 
-      AND created_at < $3
-      ORDER BY created_at DESC
+      AND (
+        created_at < $3
+        OR (created_at = $3 AND id < $4)
+      )
+      ORDER BY created_at DESC, id DESC
       LIMIT 15; 
       `,
-      [user.id, userId, cursor],
+      [user.id, userId, created_at, cursorId],
     );
 
     const messages = result.rows.reverse();
 
+    const last = messages[0];
+
     return res.status(200).json({
       messages,
-      nextCursor: messages.length ? messages[0].created_at : null,
+      nextCursor: last ? { created_at: last.created_at, id: last.id } : null,
     });
   } catch (error) {
     console.error("getNextMessagesByUserId controller error:", error);
