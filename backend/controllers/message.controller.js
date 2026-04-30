@@ -1,4 +1,5 @@
 import { db } from "../db/db.js";
+import uploadImage from "../storage/uploadImage.js";
 
 export const getAllUsers = async (req, res) => {
   const user = req.user;
@@ -157,4 +158,51 @@ export const getNextMessagesByUserId = async (req, res) => {
   }
 };
 
-export const sendMessage = async (req, res) => {};
+export const sendMessage = async (req, res) => {
+  const user = req.user;
+  const { userId } = req.params;
+  const { text, image } = req.body;
+
+  const trimmedText = text?.trim();
+
+  if (!userId) {
+    return res.status(400).json({ message: "No user ID provided" });
+  }
+
+  if (!trimmedText && !image) {
+    return res.status(400).json({ message: "Message has no content" });
+  }
+
+  try {
+    let imageUrl = null;
+    let imagePath = null;
+
+    if (image) {
+      const upload = await uploadImage(
+        image,
+        "message-images",
+        "message-images",
+        user.id,
+      );
+
+      imageUrl = upload.publicUrl;
+      imagePath = upload.imagePath;
+    }
+
+    const result = await db.query(
+      `
+      INSERT INTO messages (sender_id, receiver_id, content, image_url, image_path)
+      VALUES ($1, $2, $3, $4, $5)
+      RETURNING id, sender_id, receiver_id, content, image_url, image_path, created_at;
+      `,
+      [user.id, userId, trimmedText, imageUrl, imagePath],
+    );
+
+    const message = result.rows[0];
+
+    res.status(201).json({ message: "Message sent", message });
+  } catch (error) {
+    console.error("sendMessage controller error:", error);
+    res.status(500).json({ message: "Server Error" });
+  }
+};
