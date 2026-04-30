@@ -14,6 +14,7 @@ router.use(protectRoute);
 router.get("/", getAllUsers);
 router.get("/contacts", getUserContactList);
 router.get("/:userId", getMessagesByUserId);
+router.get("/:userId", getNextMessagesByUserId);
 router.post("/:userId", sendMessage);
 
 export default router;

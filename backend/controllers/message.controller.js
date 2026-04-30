@@ -100,4 +100,6 @@ export const getMessagesByUserId = async (req, res) => {
   }
 };
 
+export const getNextMessagesByUserId = async (req, res) => {};
+
 export const sendMessage = async (req, res) => {};
