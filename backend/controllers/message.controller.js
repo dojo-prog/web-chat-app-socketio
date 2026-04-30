@@ -31,15 +31,15 @@ export const getUserContactList = async (req, res) => {
 
     result = await db.query(
       `
-      SELECT senderId, receiverId FROM messages
-      WHERE senderId = $1 OR receiverId = $1
+      SELECT sender_id, receiver_id FROM messages
+      WHERE sender_id = $1 OR receiver_id = $1
       `,
       [user.id],
     );
 
     const contactIds = result.rows.flatMap((row) => [
-      row.senderId,
-      row.receiverId,
+      row.sender_id,
+      row.receiver_id,
     ]);
     const uniqueIds = [...new Set(contactIds)];
 
@@ -81,9 +81,9 @@ export const getMessagesByUserId = async (req, res) => {
       `
       SELECT * FROM messages
       WHERE (
-        senderId = $1 AND receiverId = $2
+        sender_id = $1 AND receiver_id = $2
       ) OR (
-       receiverId = $1 AND senderId = $2
+       receiver_id = $1 AND sender_id = $2
       )
       ORDER BY created_at DESC, id DESC
       LIMIT 15;
@@ -127,9 +127,9 @@ export const getNextMessagesByUserId = async (req, res) => {
       `
       SELECT * FROM messages 
       WHERE (
-        (senderId = $1 AND receiverId = $2)
+        (sender_id = $1 AND receiver_id = $2)
         OR  
-        (receiverId = $1 AND senderId = $2)
+        (receiver_id = $1 AND sender_id = $2)
       ) 
       AND (
         created_at < $3
