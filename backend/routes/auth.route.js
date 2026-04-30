@@ -18,6 +18,6 @@ router.get("/profile", protectRoute, getUserProfile);
 router.post("/signup", validateSignup, signup);
 router.post("/login", validateLogin, login);
 router.post("/logout", logout);
-router.post("/update-profile", protectRoute, updateProfile);
+router.put("/update-profile", protectRoute, updateProfile);
 
 export default router;
