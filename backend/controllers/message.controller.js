@@ -79,7 +79,8 @@ export const getMessagesByUserId = async (req, res) => {
   try {
     const result = await db.query(
       `
-      SELECT * FROM messages
+      SELECT id, sender_id, receiver_id, content, image_url, image_path, created_at
+      FROM messages
       WHERE (
         sender_id = $1 AND receiver_id = $2
       ) OR (
@@ -125,7 +126,8 @@ export const getNextMessagesByUserId = async (req, res) => {
   try {
     const result = await db.query(
       `
-      SELECT * FROM messages 
+      SELECT id, sender_id, receiver_id, content, image_url, image_path, created_at
+      FROM messages 
       WHERE (
         (sender_id = $1 AND receiver_id = $2)
         OR  
