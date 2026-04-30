@@ -4,8 +4,8 @@ import { ENV } from "../lib/env.js";
 import testConnection from "../db/test.js";
 import { testStorage } from "../lib/supabase.js";
 import authRouter from "../routes/auth.route.js";
+import { app, server } from "../lib/socket.js";
 
-const app = express();
 const PORT = ENV.PORT;
 
 app.use(express.json({ limit: "2mb" }));
@@ -13,7 +13,7 @@ app.use(cookieParser());
 
 app.use("/api/v1/auth", authRouter);
 
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`Server running on port: ${PORT}`);
   testConnection();
   testStorage();
