@@ -11,3 +11,5 @@ const deleteImage = async (imagePath, bucketName) => {
     throw error;
   }
 };
+
+export { deleteImage };
