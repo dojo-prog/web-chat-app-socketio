@@ -6,6 +6,7 @@ const ENV = {
   AUTH_TOKEN_SECRET: process.env.AUTH_TOKEN_SECRET,
   SUPABASE_URL: process.env.SUPABASE_URL,
   SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
+  CLIENT_URL: process.env.CLIENT_URL,
 };
 
 export { ENV };
