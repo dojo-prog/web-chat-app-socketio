@@ -100,6 +100,49 @@ export const getMessagesByUserId = async (req, res) => {
   }
 };
 
-export const getNextMessagesByUserId = async (req, res) => {};
+export const getNextMessagesByUserId = async (req, res) => {
+  const user = req.user;
+  const { userId } = req.params;
+  const { cursor } = req.query;
+
+  if (!userId) {
+    return res.status(400).json({ message: "No user ID provided" });
+  }
+
+  if (!cursor) {
+    return res.status(400).json({ message: "No cursor provided" });
+  }
+
+  if (isNaN(Date.parse(cursor))) {
+    return res.status(400).json({ message: "Invalid cursor" });
+  }
+
+  try {
+    const result = await db.query(
+      `
+      SELECT * FROM messages 
+      WHERE (
+        (senderId = $1 AND receiverId = $2)
+        OR  
+        (receiverId = $1 AND senderId = $2)
+      ) 
+      AND created_at < $3
+      ORDER BY created_at DESC
+      LIMIT 15; 
+      `,
+      [user.id, userId, cursor],
+    );
+
+    const messages = result.rows.reverse();
+
+    return res.status(200).json({
+      messages,
+      nextCursor: messages.length ? messages[0].created_at : null,
+    });
+  } catch (error) {
+    console.error("getNextMessagesByUserId controller error:", error);
+    res.status(500).json({ message: "Server Error" });
+  }
+};
 
 export const sendMessage = async (req, res) => {};
