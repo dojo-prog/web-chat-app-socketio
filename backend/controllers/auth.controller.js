@@ -5,7 +5,15 @@ import { ENV } from "../lib/env.js";
 import uploadImage from "../storage/uploadImage.js";
 import { deleteImage } from "../storage/deleteImage.js";
 
-export const getUserProfile = async (req, res) => {};
+export const getUserProfile = async (req, res) => {
+  const user = req.user;
+  try {
+    res.status(200).json({ user });
+  } catch (error) {
+    console.error("getUserProfile controller error:", error);
+    res.status(500).json({ message: "Server Error" });
+  }
+};
 
 export const signup = async (req, res) => {
   const { fname, lname, email, password, cPassword } = req.body;
