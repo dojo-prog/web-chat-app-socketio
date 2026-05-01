@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import CustomButton from "../components/CustomButton";
 import CustomInput from "../components/CustomInput";
 import { useForm } from "../hooks/useForm";
@@ -50,9 +51,12 @@ const LoginPage = () => {
         <div className="mt-4">
           <p className="text-xs text-gray-400 mt-2">
             Don't have an account?{" "}
-            <span className="text-blue-500 font-semibold cursor-pointer">
+            <Link
+              to={"/auth/signup"}
+              className="text-blue-500 font-semibold cursor-pointer"
+            >
               Sign Up
-            </span>
+            </Link>
           </p>
         </div>
       </div>
