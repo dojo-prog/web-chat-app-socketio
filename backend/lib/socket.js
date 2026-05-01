@@ -21,6 +21,8 @@ const userSocketMap = {};
 io.on("connection", (socket) => {
   console.log(`User connected (${socket.userId})`);
 
+  socket.join(socket.userId);
+
   if (!userSocketMap[socket.userId]) {
     userSocketMap[socket.userId] = new Set();
   }

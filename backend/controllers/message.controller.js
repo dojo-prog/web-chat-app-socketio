@@ -1,4 +1,5 @@
 import { db } from "../db/db.js";
+import { io } from "../lib/socket.js";
 import uploadImage from "../storage/uploadImage.js";
 
 export const getAllUsers = async (req, res) => {
@@ -199,6 +200,8 @@ export const sendMessage = async (req, res) => {
     );
 
     const message = result.rows[0];
+
+    io.to(userId).emit("new_message", message);
 
     res.status(201).json({ message: "Message sent", message });
   } catch (error) {
