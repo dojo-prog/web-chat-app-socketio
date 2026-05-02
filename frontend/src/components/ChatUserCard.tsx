@@ -1,12 +1,18 @@
 import type { User } from "../stores/auth.store";
+import useMessageStore from "../stores/message.store";
 
 interface ChatUserCardProps {
   user: User;
 }
 
 const ChatUserCard = ({ user: u }: ChatUserCardProps) => {
+  const { setSelectedUser } = useMessageStore();
+
   return (
-    <div className="flex items-start px-6 py-4 hover:bg-gray-100 transition-colors duration-150 select-none cursor-pointer">
+    <div
+      className="flex items-start px-6 py-4 hover:bg-gray-100 transition-colors duration-150 select-none cursor-pointer"
+      onClick={() => setSelectedUser(u)}
+    >
       <div className="w-12 h-12 bg-blue-100 rounded-full mr-2 overflow-hidden flex items-center justify-center">
         {u.avatar_url ? (
           <img
