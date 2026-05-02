@@ -12,10 +12,10 @@ const router = express.Router();
 
 router.use(protectRoute);
 
-router.get("/", getAllUsers);
+router.get("/users", getAllUsers);
 router.get("/contacts", getUserContactList);
 router.get("/:userId", getMessagesByUserId);
-router.get("/:userId", getNextMessagesByUserId);
+router.get("/next/:userId", getNextMessagesByUserId);
 router.post("/:userId", sendMessage);
 
 export default router;
