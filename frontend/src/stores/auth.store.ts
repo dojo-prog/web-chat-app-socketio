@@ -36,6 +36,9 @@ interface AuthState {
   checkingAuth: boolean;
   loading: boolean;
 
+  socket: Record<any, any> | null;
+  onlineUsers: string[];
+
   checkAuth: () => Promise<void>;
   signup: (signupInputs: SignupInputs) => Promise<void>;
   login: (signinInputs: SigninInputs) => Promise<void>;
@@ -48,6 +51,9 @@ const useAuthStore = create<AuthState>((set) => ({
 
   checkingAuth: false,
   loading: false,
+
+  socket: null,
+  onlineUsers: [],
 
   checkAuth: async () => {
     set({ checkingAuth: true });
