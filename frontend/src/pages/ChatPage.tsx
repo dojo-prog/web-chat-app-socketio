@@ -1,4 +1,3 @@
-import { MessageCircleMore, SearchIcon, XIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import ChatUserCard from "../components/ChatUserCard";
 import useMessageStore from "../stores/message.store";
@@ -6,6 +5,7 @@ import UserListLoader from "../components/loaders/UserListLoader";
 import EmptyUserList from "../components/empty/EmptyUserList";
 import NoConverstationSelected from "../components/empty/NoConverstationSelected";
 import Conversation from "../components/Conversation";
+import { SearchIcon } from "lucide-react";
 
 const tabs = [
   { key: "all", title: "All users" },
