@@ -1,7 +1,6 @@
 import { create } from "zustand";
 import axios from "../lib/axios";
 import { toast } from "react-toastify";
-import { returnMissing } from "../utils/returnMissing";
 import { validateSignin, validateSignup } from "../validators/auth.validator";
 import { capitalize } from "../utils/capitalize";
 
@@ -133,6 +132,7 @@ const useAuthStore = create<AuthState>((set) => ({
     try {
       await axios.post("auth/logout");
       toast.success("Logout successful");
+      set({ user: null });
     } catch (error: any) {
       console.error("logout error:", error);
       toast.error(
