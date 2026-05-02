@@ -19,8 +19,7 @@ interface MessagePayload {
 }
 
 interface MessageState {
-  allUser: User[];
-  contacts: User[];
+  userList: User[];
 
   fetchingUserList: boolean;
   fetchingInitialMessages: boolean;
@@ -41,8 +40,7 @@ interface MessageState {
 }
 
 const useMessageStore = create<MessageState>((set, get) => ({
-  allUser: [],
-  contacts: [],
+  userList: [],
 
   fetchingUserList: false,
   fetchingInitialMessages: false,
@@ -58,8 +56,8 @@ const useMessageStore = create<MessageState>((set, get) => ({
   fetchAllUsers: async () => {
     set({ fetchingUserList: true });
     try {
-      const res = await axios.get("/users");
-      set({ allUser: res.data.users ?? [] });
+      const res = await axios.get("/messages/users");
+      set({ userList: res.data.users ?? [] });
     } catch (error) {
       console.error("fetchAllUsers error:", error);
     } finally {
@@ -70,8 +68,8 @@ const useMessageStore = create<MessageState>((set, get) => ({
   fetchUserContacts: async () => {
     set({ fetchingUserList: true });
     try {
-      const res = await axios.get("/contacts");
-      set({ contacts: res.data.contacts ?? [] });
+      const res = await axios.get("messages/contacts");
+      set({ userList: res.data.contacts ?? [] });
     } catch (error) {
       console.error("fetchUserContacts error:", error);
     } finally {
@@ -86,7 +84,7 @@ const useMessageStore = create<MessageState>((set, get) => ({
 
     set({ fetchingInitialMessages: true });
     try {
-      const res = await axios.get(`/${userId}`);
+      const res = await axios.get(`/messages/${userId}`);
       set({
         selectedUserMessages: res.data.messages ?? [],
         messageCursor: res.data.nextCursor ?? {},
@@ -108,7 +106,7 @@ const useMessageStore = create<MessageState>((set, get) => ({
 
     set({ fetchingNextMessages: true });
     try {
-      const res = await axios.get(`/next/${userId}`, {
+      const res = await axios.get(`/messages/next/${userId}`, {
         params: get().messageCursor,
       });
       set((state) => ({
@@ -139,7 +137,7 @@ const useMessageStore = create<MessageState>((set, get) => ({
 
     set({ sendingMessage: true });
     try {
-      const res = await axios.post(`/${selectedUser.id}`, {
+      const res = await axios.post(`/messages/${selectedUser.id}`, {
         text: message.text,
         image: message.image,
       });
