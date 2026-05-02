@@ -56,7 +56,7 @@ export const login = async (req, res) => {
     // Existing user check
     const result = await db.query(
       `
-      SELECT id, fname, lname, email, avatar_url, avatar_path, created_at
+      SELECT id, fname, lname, email, password, avatar_url, avatar_path, created_at
       FROM users
       WHERE email = $1
       `,
@@ -78,7 +78,9 @@ export const login = async (req, res) => {
 
     setAuthToken(user.id, res);
 
-    res.status(200).json({ message: "Login successful", user });
+    const { password: _password, ...safeUser } = user;
+
+    res.status(200).json({ message: "Login successful", user: safeUser });
   } catch (error) {
     console.error("login controller error:", error);
     res.status(500).json({ message: "Server Error" });
