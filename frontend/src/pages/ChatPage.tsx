@@ -1,9 +1,11 @@
-import { MessageCircleMore, SearchIcon } from "lucide-react";
+import { MessageCircleMore, SearchIcon, XIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import ChatUserCard from "../components/ChatUserCard";
 import useMessageStore from "../stores/message.store";
 import UserListLoader from "../components/loaders/UserListLoader";
 import EmptyUserList from "../components/empty/EmptyUserList";
+import NoConverstationSelected from "../components/empty/NoConverstationSelected";
+import Conversation from "../components/Conversation";
 
 const tabs = [
   { key: "all", title: "All users" },
@@ -11,8 +13,13 @@ const tabs = [
 ];
 
 const ChatPage = () => {
-  const { fetchAllUsers, fetchUserContacts, fetchingUserList, userList } =
-    useMessageStore();
+  const {
+    fetchAllUsers,
+    fetchUserContacts,
+    fetchingUserList,
+    userList,
+    selectedUser,
+  } = useMessageStore();
 
   const [selectedTab, setSelectedTab] = useState("all");
 
@@ -58,17 +65,8 @@ const ChatPage = () => {
       </div>
 
       {/* Chat Containter */}
-      <div className="w-2/3 h-full bg-white rounded-lg">
-        {/* No Convo Selected UI */}
-        <div className="h-full w-full flex items-center justify-center">
-          <div className="flex flex-col items-center justify-center space-y-3">
-            <MessageCircleMore size={100} className="text-blue-500" />
-            <h2 className="text-xl font-semibold">No conversation selected</h2>
-            <p className="text-sm text-gray-500">
-              You can view and choose your converation in the sidebar
-            </p>
-          </div>
-        </div>
+      <div className="w-2/3 h-full bg-white rounded-lg overflow-hidden">
+        {!selectedUser ? <NoConverstationSelected /> : <Conversation />}
       </div>
     </div>
   );
