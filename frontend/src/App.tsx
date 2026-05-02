@@ -5,6 +5,7 @@ import AuthLayout from "./layouts/AuthLayout";
 import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
 import NotFoundPage from "./pages/NotFoundPage";
+import { Slide, ToastContainer } from "react-toastify";
 
 const App = () => {
   return (
@@ -22,6 +23,8 @@ const App = () => {
 
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
+
+      <ToastContainer theme="colored" transition={Slide} autoClose={2000} />
     </>
   );
 };
