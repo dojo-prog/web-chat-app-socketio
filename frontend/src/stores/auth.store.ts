@@ -93,7 +93,7 @@ const useAuthStore = create<AuthState>((set) => ({
       set({ user: res.data.user ?? null });
       toast.success(res.data.message || "Signup successful");
     } catch (error: any) {
-      console.error("singup error:", error);
+      console.error("signup error:", error);
       toast.error(
         error.response.data.message || "Error signing you up. Please try again",
       );
