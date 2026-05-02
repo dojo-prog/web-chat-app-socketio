@@ -2,8 +2,11 @@ import { Link } from "react-router-dom";
 import CustomButton from "../components/CustomButton";
 import CustomInput from "../components/CustomInput";
 import { useForm } from "../hooks/useForm";
+import useAuthStore, { type SignupInputs } from "../stores/auth.store";
 
 const SignupPage = () => {
+  const { signup, loading } = useAuthStore();
+
   const { formData, handleChange } = useForm({
     fname: "",
     lname: "",
@@ -11,6 +14,12 @@ const SignupPage = () => {
     password: "",
     cPassword: "",
   });
+
+  const handleSubmit = (e: any) => {
+    e.preventDefault();
+
+    signup(formData as SignupInputs);
+  };
 
   return (
     <div className="h-full w-full flex">
@@ -29,7 +38,7 @@ const SignupPage = () => {
         </div>
 
         {/* Form */}
-        <form className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div className="flex space-x-2">
             <CustomInput
               label="First Name"
@@ -74,7 +83,7 @@ const SignupPage = () => {
             onChange={handleChange}
           />
 
-          <CustomButton type="submit" title="Sign Up" />
+          <CustomButton type="submit" title="Sign Up" loading={loading} />
         </form>
 
         <div className="mt-4">
