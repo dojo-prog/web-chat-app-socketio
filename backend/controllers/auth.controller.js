@@ -28,7 +28,7 @@ export const signup = async (req, res) => {
       `
       INSERT INTO users (fname, lname, email, password)
       VALUES ($1, $2, $3, $4) 
-      RETURNING id, fname, lname, email
+      RETURNING id, fname, lname, email, avatar_url, avatar_path, created_at;
       `,
       [fname, lname, email, hashedPassword],
     );
@@ -56,7 +56,7 @@ export const login = async (req, res) => {
     // Existing user check
     const result = await db.query(
       `
-      SELECT * 
+      SELECT id, fname, lname, email, avatar_url, avatar_path, created_at
       FROM users
       WHERE email = $1
       `,
@@ -78,9 +78,7 @@ export const login = async (req, res) => {
 
     setAuthToken(user.id, res);
 
-    const { password: p, ...safeUser } = user;
-
-    res.status(200).json({ message: "Login successful", user: safeUser });
+    res.status(200).json({ message: "Login successful", user });
   } catch (error) {
     console.error("login controller error:", error);
     res.status(500).json({ message: "Server Error" });
@@ -146,7 +144,7 @@ export const updateProfile = async (req, res) => {
       UPDATE users
       SET ${setClause}
       WHERE id = $${values.length}
-      RETURNING *;
+      RETURNING id, fname, lname, email, avatar_url, avatar_path, created_at;
       `,
       values,
     );
