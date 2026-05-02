@@ -1,5 +1,7 @@
 import { create } from "zustand";
 import type { User } from "./auth.store";
+import axios from "../lib/axios";
+import { toast } from "react-toastify";
 
 interface Message {
   id: string;
@@ -11,36 +13,149 @@ interface Message {
   created_at: string;
 }
 
+interface MessagePayload {
+  text: string;
+  image: File;
+}
+
 interface MessageState {
   allUser: User[];
   contacts: User[];
 
   fetchingUserList: boolean;
+  fetchingInitialMessages: boolean;
+  fetchingNextMessages: boolean;
+  sendingMessage: boolean;
+
+  selectedUserMessages: Message[];
+  messageCursor: Record<string, any>;
 
   selectedUser: User | null;
   setSelectedUser: (user: User) => void;
 
   fetchAllUsers: () => Promise<void>;
   fetchUserContacts: () => Promise<void>;
-  fetchMessagesByUserId: (userId: string) => Promise<void>;
+  fetchInitialMessagesByUserId: (userId: string) => Promise<void>;
   fetchNextMessagesByUserId: (userId: string) => Promise<void>;
-  sendMessage: (message: Partial<Message>) => Promise<void>;
+  sendMessage: (message: MessagePayload) => Promise<void>;
 }
 
-const useMessageStore = create<MessageState>((set) => ({
+const useMessageStore = create<MessageState>((set, get) => ({
   allUser: [],
   contacts: [],
 
   fetchingUserList: false,
+  fetchingInitialMessages: false,
+  fetchingNextMessages: false,
+  sendingMessage: false,
+
+  selectedUserMessages: [],
+  messageCursor: {},
 
   selectedUser: null,
-  setSelectedUser: (user) => {},
+  setSelectedUser: (user) => set({ selectedUser: user }),
 
-  fetchAllUsers: async () => {},
-  fetchUserContacts: async () => {},
-  fetchMessagesByUserId: async () => {},
-  fetchNextMessagesByUserId: async () => {},
-  sendMessage: async (message) => {},
+  fetchAllUsers: async () => {
+    set({ fetchingUserList: true });
+    try {
+      const res = await axios.get("/users");
+      set({ allUser: res.data.users ?? [] });
+    } catch (error) {
+      console.error("fetchAllUsers error:", error);
+    } finally {
+      set({ fetchingUserList: false });
+    }
+  },
+
+  fetchUserContacts: async () => {
+    set({ fetchingUserList: true });
+    try {
+      const res = await axios.get("/contacts");
+      set({ contacts: res.data.contacts ?? [] });
+    } catch (error) {
+      console.error("fetchUserContacts error:", error);
+    } finally {
+      set({ fetchingUserList: false });
+    }
+  },
+
+  fetchInitialMessagesByUserId: async (userId) => {
+    if (!userId) {
+      throw new Error("Client failed to pass in userId");
+    }
+
+    set({ fetchingInitialMessages: true });
+    try {
+      const res = await axios.get(`/${userId}`);
+      set({
+        selectedUserMessages: res.data.messages ?? [],
+        messageCursor: res.data.nextCursor ?? {},
+      });
+    } catch (error: any) {
+      console.error("fetchInitialMessagesByUserId error:", error);
+      toast.error(
+        error.response.data.message || "Error fetching messages with user",
+      );
+    } finally {
+      set({ fetchingInitialMessages: false });
+    }
+  },
+
+  fetchNextMessagesByUserId: async (userId) => {
+    if (!userId) {
+      throw new Error("Client failed to pass in userId");
+    }
+
+    set({ fetchingNextMessages: true });
+    try {
+      const res = await axios.get(`/next/${userId}`, {
+        params: get().messageCursor,
+      });
+      set((state) => ({
+        selectedUserMessages: [
+          ...res.data.messages,
+          ...state.selectedUserMessages,
+        ],
+        messageCursor: res.data.nextCursor ?? {},
+      }));
+    } catch (error) {
+      console.error("fetchNextMessagesByUserId error:", error);
+    } finally {
+      set({ fetchingNextMessages: false });
+    }
+  },
+
+  sendMessage: async (message) => {
+    const { selectedUser } = get();
+
+    if (!selectedUser) {
+      throw new Error("Client failed to register selectedUser");
+    }
+
+    if (!message?.text?.trim() && !message.image) {
+      toast.error("Message has no content");
+      return;
+    }
+
+    set({ sendingMessage: true });
+    try {
+      const res = await axios.post(`/${selectedUser.id}`, {
+        text: message.text,
+        image: message.image,
+      });
+      set((state) => ({
+        selectedUserMessages: [...state.selectedUserMessages, res.data.message],
+      }));
+    } catch (error: any) {
+      console.error("sendMessage error:", error);
+      toast.error(
+        error.response.data.message ||
+          "Something went wrong in sending your message. Please try again",
+      );
+    } finally {
+      set({ sendingMessage: false });
+    }
+  },
 }));
 
 export default useMessageStore;
