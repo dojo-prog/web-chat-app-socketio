@@ -7,9 +7,17 @@ import SignupPage from "./pages/SignupPage";
 import NotFoundPage from "./pages/NotFoundPage";
 import { Slide, ToastContainer } from "react-toastify";
 import useAuthStore from "./stores/auth.store";
+import { useEffect } from "react";
 
 const App = () => {
-  const { user } = useAuthStore();
+  const { user, checkAuth, checkingAuth } = useAuthStore();
+
+  useEffect(() => {
+    checkAuth();
+  }, [checkAuth]);
+
+  // TODO add page loader
+  if (checkingAuth) return null;
 
   return (
     <>
