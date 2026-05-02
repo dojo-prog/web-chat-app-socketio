@@ -30,7 +30,7 @@ interface MessageState {
   messageCursor: Record<string, any>;
 
   selectedUser: User | null;
-  setSelectedUser: (user: User) => void;
+  setSelectedUser: (user: User | null) => void;
 
   fetchAllUsers: () => Promise<void>;
   fetchUserContacts: () => Promise<void>;
