@@ -61,7 +61,7 @@ export const getUserContactList = async (req, res) => {
       uniqueIds,
     );
 
-    const contacts = result.rows;
+    const contacts = result.rows.filter((row) => row.id !== user.id);
 
     res.status(200).json({ contacts });
   } catch (error) {
