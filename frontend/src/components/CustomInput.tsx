@@ -9,6 +9,7 @@ interface CustomInputProps {
   onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
   disabled?: boolean;
   required?: boolean;
+  autocomplete?: boolean;
   labelStyles?: string;
   inputStyles?: string;
 }
@@ -22,6 +23,7 @@ const CustomInput = ({
   onChange,
   disabled = false,
   required = true,
+  autocomplete = true,
   labelStyles,
   inputStyles,
 }: CustomInputProps) => {
@@ -42,6 +44,7 @@ const CustomInput = ({
         onChange={onChange}
         disabled={disabled}
         required={required}
+        autoComplete={autocomplete ? "on" : "off"}
         className={`w-full border border-gray-200 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ${inputStyles}`}
       />
     </div>

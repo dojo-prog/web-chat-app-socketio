@@ -221,6 +221,7 @@ const Conversation = () => {
             onChange={handleChange}
             disabled={sendingMessage}
             required={false}
+            autocomplete={false}
           />
         </div>
         <button className="h-10 w-16 bg-blue-100 text-blue-500 flex items-center justify-center rounded-md cursor-pointer">
