@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import useAuthStore from "../stores/auth.store";
 import { useState } from "react";
-import { LogOut, PenIcon } from "lucide-react";
+import { ChevronDownIcon, LogOut, PenIcon } from "lucide-react";
 
 const NavBar = () => {
   const { user, logout } = useAuthStore();
@@ -45,10 +45,13 @@ const NavBar = () => {
               {user?.fname} {user?.lname}
             </h2>
           </div>
+          <div>
+            <ChevronDownIcon size={15} className="ml-2" />
+          </div>
 
           {/* Dropdown */}
           {userDropdownOpen && (
-            <div className="absolute top-full -right-4 w-40 mt-6 bg-white ">
+            <div className="absolute top-full -right-4 w-40 mt-6 bg-white shadow-lg shadow-blue-500/30 ">
               <button className="w-full p-3 flex items-center justify-center hover:bg-gray-200 text-sm cursor-pointer">
                 <PenIcon size={15} className="mr-2" />
                 Edit Profile
