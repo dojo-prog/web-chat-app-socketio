@@ -52,7 +52,7 @@ const useMessageStore = create<MessageState>((set, get) => ({
 
   selectedUser: null,
   setSelectedUser: (user) => {
-    if (!user) return;
+    if (!user || user.id === get().selectedUser?.id) return;
 
     set({ selectedUserMessages: [], selectedUser: user });
     get().fetchInitialMessagesByUserId(user.id);
