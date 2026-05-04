@@ -12,6 +12,8 @@ const Conversation = () => {
     selectedUser,
     setSelectedUser,
     fetchingInitialMessages,
+    fetchNextMessagesByUserId,
+    fetchingNextMessages,
     selectedUserMessages,
     sendMessage,
     sendingMessage,
@@ -45,7 +47,25 @@ const Conversation = () => {
     };
   }, [imagePreview]);
 
+  const messagesContainerRef = useRef<HTMLDivElement | null>(null);
   const messageEndRef = useRef<HTMLDivElement | null>(null);
+
+  const handleScroll = async () => {
+    const container = messagesContainerRef.current;
+    if (!container || fetchingNextMessages) return;
+
+    if (container.scrollTop <= 0) {
+      const prevScrollHeight = container.scrollHeight;
+
+      await fetchNextMessagesByUserId();
+
+      requestAnimationFrame(() => {
+        if (!container) return;
+        const newScrollHeight = container.scrollHeight;
+        container.scrollTop = newScrollHeight - prevScrollHeight;
+      });
+    }
+  };
 
   useEffect(() => {
     messageEndRef.current?.scrollIntoView({ behavior: "instant" });
@@ -90,52 +110,63 @@ const Conversation = () => {
       ) : selectedUserMessages.length === 0 ? (
         <EmptyMessages />
       ) : (
-        <div className="flex-1 overflow-y-auto px-6 py-4 space-y-3">
-          {selectedUserMessages.map((msg) => {
-            const isSender = msg.sender_id === user?.id;
+        <>
+          {fetchingNextMessages && (
+            <div className="h-12 w-full bg-transparent flex items-center justify-center">
+              <Loader2Icon className="text-blue-500 h-full animate-spin" />
+            </div>
+          )}
+          <div
+            ref={messagesContainerRef}
+            className="flex-1 overflow-y-auto px-6 py-4 space-y-3"
+            onScroll={handleScroll}
+          >
+            {selectedUserMessages.map((msg) => {
+              const isSender = msg.sender_id === user?.id;
 
-            return (
-              <div
-                key={msg.id}
-                className={`flex ${isSender ? "justify-end" : "justify-start"}`}
-              >
+              return (
                 <div
-                  className={`max-w-[70%] px-4 py-2 rounded-lg text-sm ${
-                    isSender
-                      ? "bg-blue-500 text-white rounded-br-none"
-                      : "bg-gray-100 text-gray-800 rounded-bl-none"
-                  }`}
+                  key={msg.id}
+                  className={`flex ${isSender ? "justify-end" : "justify-start"}`}
                 >
-                  {/* Image (if exists) */}
-                  {msg.image_url && (
-                    <img
-                      src={msg.image_url}
-                      alt="message"
-                      className="mb-2 rounded-md max-h-60 object-cover"
-                    />
-                  )}
-
-                  {/* Text */}
-                  {msg.content && <p>{msg.content}</p>}
-
-                  {/* Timestamp */}
-                  <p
-                    className={`text-[10px] mt-1 ${
-                      isSender ? "text-blue-100" : "text-gray-400"
+                  <div
+                    className={`max-w-[70%] px-4 py-2 rounded-lg text-sm ${
+                      isSender
+                        ? "bg-blue-500 text-white rounded-br-none"
+                        : "bg-gray-100 text-gray-800 rounded-bl-none"
                     }`}
                   >
-                    {new Date(msg.created_at).toLocaleTimeString([], {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </p>
-                </div>
-              </div>
-            );
-          })}
+                    {/* Image (if exists) */}
+                    {msg.image_url && (
+                      <img
+                        src={msg.image_url}
+                        alt="message"
+                        className="mb-2 rounded-md max-h-60 object-cover"
+                      />
+                    )}
 
-          <div ref={messageEndRef} />
-        </div>
+                    {/* Text */}
+                    {msg.content && <p>{msg.content}</p>}
+
+                    {/* Timestamp */}
+                    <p
+                      className={`text-[10px] mt-1 ${
+                        isSender ? "text-blue-100" : "text-gray-400"
+                      }`}
+                    >
+                      {new Date(msg.created_at).toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
+
+            <div ref={messageEndRef} />
+          </div>
+        </>
       )}
 
       {/* Image Preview */}
