@@ -105,23 +105,27 @@ const useMessageStore = create<MessageState>((set, get) => ({
   },
 
   fetchNextMessagesByUserId: async () => {
-    const { selectedUser } = get();
+    const { selectedUser, messageCursor } = get();
 
     if (!selectedUser?.id) {
       throw new Error("Client failed to pass in userId");
     }
 
+    if (!messageCursor) {
+      return;
+    }
+
     set({ fetchingNextMessages: true });
     try {
       const res = await axios.get(`/messages/next/${selectedUser.id}`, {
-        params: get().messageCursor,
+        params: messageCursor,
       });
       set((state) => ({
         selectedUserMessages: [
           ...res.data.messages,
           ...state.selectedUserMessages,
         ],
-        messageCursor: res.data.nextCursor ?? {},
+        messageCursor: res.data.nextCursor ?? null,
       }));
     } catch (error) {
       console.error("fetchNextMessagesByUserId error:", error);
@@ -155,7 +159,7 @@ const useMessageStore = create<MessageState>((set, get) => ({
       }
 
       const res = await axios.post(`/messages/${selectedUser.id}`, formData, {
-        headers: { "Content-Type:": "multipart/form-data" },
+        headers: { "Content-Type": "multipart/form-data" },
       });
       set((state) => ({
         selectedUserMessages: [...state.selectedUserMessages, res.data.message],
