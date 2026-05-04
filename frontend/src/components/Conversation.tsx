@@ -1,7 +1,7 @@
 import useMessageStore, { type MessagePayload } from "../stores/message.store";
 import { ImageIcon, Loader2Icon, SendIcon, XIcon } from "lucide-react";
 import CustomInput from "./CustomInput";
-import { useEffect, useState, type ChangeEvent } from "react";
+import { useEffect, useState } from "react";
 import useAuthStore from "../stores/auth.store";
 import MessagesLoader from "./loaders/MessagesLoader";
 import EmptyMessages from "./empty/EmptyMessages";
@@ -11,7 +11,6 @@ const Conversation = () => {
   const {
     selectedUser,
     setSelectedUser,
-    fetchInitialMessagesByUserId,
     fetchingInitialMessages,
     selectedUserMessages,
     sendMessage,
@@ -39,12 +38,6 @@ const Conversation = () => {
     resetForm();
     setImagePreview("");
   };
-
-  if (!selectedUser) return null;
-
-  useEffect(() => {
-    fetchInitialMessagesByUserId(selectedUser.id);
-  }, [selectedUser]);
 
   useEffect(() => {
     return () => {
