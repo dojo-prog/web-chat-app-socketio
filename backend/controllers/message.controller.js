@@ -53,7 +53,7 @@ export const getUserContactList = async (req, res) => {
 
     result = await db.query(
       `
-      SELECT fname, lname, email, avatar_url
+      SELECT id, fname, lname, email, avatar_url
       FROM users
       WHERE id IN (${placeholders})
       ORDER BY fname ASC;
