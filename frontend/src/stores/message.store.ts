@@ -35,7 +35,7 @@ interface MessageState {
   fetchAllUsers: () => Promise<void>;
   fetchUserContacts: () => Promise<void>;
   fetchInitialMessagesByUserId: (userId: string) => Promise<void>;
-  fetchNextMessagesByUserId: (userId: string) => Promise<void>;
+  fetchNextMessagesByUserId: () => Promise<void>;
   sendMessage: (message: MessagePayload) => Promise<void>;
 }
 
@@ -104,14 +104,16 @@ const useMessageStore = create<MessageState>((set, get) => ({
     }
   },
 
-  fetchNextMessagesByUserId: async (userId) => {
-    if (!userId) {
+  fetchNextMessagesByUserId: async () => {
+    const { selectedUser } = get();
+
+    if (!selectedUser?.id) {
       throw new Error("Client failed to pass in userId");
     }
 
     set({ fetchingNextMessages: true });
     try {
-      const res = await axios.get(`/messages/next/${userId}`, {
+      const res = await axios.get(`/messages/next/${selectedUser.id}`, {
         params: get().messageCursor,
       });
       set((state) => ({
