@@ -18,7 +18,8 @@ const Conversation = () => {
     sendMessage,
     sendingMessage,
   } = useMessageStore();
-  const { user } = useAuthStore();
+
+  const { user, onlineUsers } = useAuthStore();
 
   const {
     formData: messagePayload,
@@ -71,6 +72,8 @@ const Conversation = () => {
     messageEndRef.current?.scrollIntoView({ behavior: "instant" });
   }, [selectedUserMessages]);
 
+  const userOnline = onlineUsers.includes(selectedUser!.id);
+
   return (
     <div className="h-full w-full flex flex-col">
       {/* Header */}
@@ -93,7 +96,11 @@ const Conversation = () => {
             <h2 className="text-md font-semibold">
               {selectedUser?.fname + " " + selectedUser?.lname}
             </h2>
-            <p className="text-xs text-green-500">Online</p>
+            <p
+              className={`text-xs ${userOnline ? "text-green-500" : "text-gray-500"}`}
+            >
+              {userOnline ? "Online" : "Offline"}
+            </p>
           </div>
         </div>
         <button
