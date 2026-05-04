@@ -3,6 +3,7 @@ import axios from "../lib/axios";
 import { toast } from "react-toastify";
 import { validateSignin, validateSignup } from "../validators/auth.validator";
 import { capitalize } from "../utils/capitalize";
+import useMessageStore from "./message.store";
 
 export interface User {
   id: string;
@@ -133,6 +134,7 @@ const useAuthStore = create<AuthState>((set) => ({
       await axios.post("auth/logout");
       toast.success("Logout successful");
       set({ user: null });
+      useMessageStore.getState().resetMessageState();
     } catch (error: any) {
       console.error("logout error:", error);
       toast.error(
