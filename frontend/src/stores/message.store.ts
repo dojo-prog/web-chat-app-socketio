@@ -3,19 +3,19 @@ import type { User } from "./auth.store";
 import axios from "../lib/axios";
 import { toast } from "react-toastify";
 
-interface Message {
+export interface Message {
   id: string;
-  senderId: string;
-  receiverId: string;
+  sender_id: string;
+  receiver_id: string;
   content: string | null;
   image_url: string | null;
   image_path: string | null;
   created_at: string;
 }
 
-interface MessagePayload {
+export interface MessagePayload {
   text: string;
-  image: File;
+  image: File | undefined;
 }
 
 interface MessageState {
@@ -137,9 +137,18 @@ const useMessageStore = create<MessageState>((set, get) => ({
 
     set({ sendingMessage: true });
     try {
-      const res = await axios.post(`/messages/${selectedUser.id}`, {
-        text: message.text,
-        image: message.image,
+      const formData = new FormData();
+
+      if (message.text) {
+        formData.append("text", message.text);
+      }
+
+      if (message.image) {
+        formData.append("image", message.image);
+      }
+
+      const res = await axios.post(`/messages/${selectedUser.id}`, formData, {
+        headers: { "Content-Type:": "multipart/form-data" },
       });
       set((state) => ({
         selectedUserMessages: [...state.selectedUserMessages, res.data.message],
