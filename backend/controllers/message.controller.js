@@ -162,7 +162,8 @@ export const getNextMessagesByUserId = async (req, res) => {
 export const sendMessage = async (req, res) => {
   const user = req.user;
   const { userId } = req.params;
-  const { text, image } = req.body;
+  const { text } = req.body;
+  const image = req.file;
 
   const trimmedText = text?.trim();
 
