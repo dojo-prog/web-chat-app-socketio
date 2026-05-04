@@ -27,7 +27,7 @@ interface MessageState {
   sendingMessage: boolean;
 
   selectedUserMessages: Message[];
-  messageCursor: Record<string, any>;
+  messageCursor: Record<string, any> | null;
 
   selectedUser: User | null;
   setSelectedUser: (user: User | null) => void;
@@ -37,6 +37,7 @@ interface MessageState {
   fetchInitialMessagesByUserId: (userId: string) => Promise<void>;
   fetchNextMessagesByUserId: () => Promise<void>;
   sendMessage: (message: MessagePayload) => Promise<void>;
+  resetMessageState: () => void;
 }
 
 const useMessageStore = create<MessageState>((set, get) => ({
@@ -48,7 +49,7 @@ const useMessageStore = create<MessageState>((set, get) => ({
   sendingMessage: false,
 
   selectedUserMessages: [],
-  messageCursor: {},
+  messageCursor: null,
 
   selectedUser: null,
   setSelectedUser: (user) => {
@@ -176,6 +177,10 @@ const useMessageStore = create<MessageState>((set, get) => ({
     } finally {
       set({ sendingMessage: false });
     }
+  },
+
+  resetMessageState: () => {
+    set({ userList: [], selectedUser: null, messageCursor: null });
   },
 }));
 
