@@ -7,6 +7,7 @@ import {
   getUserContactList,
   sendMessage,
 } from "../controllers/message.controller.js";
+import multerUpload from "../middlewares/multer.middleware.js";
 
 const router = express.Router();
 
@@ -16,6 +17,6 @@ router.get("/users", getAllUsers);
 router.get("/contacts", getUserContactList);
 router.get("/:userId", getMessagesByUserId);
 router.get("/next/:userId", getNextMessagesByUserId);
-router.post("/:userId", sendMessage);
+router.post("/:userId", multerUpload.single("image"), sendMessage);
 
 export default router;
