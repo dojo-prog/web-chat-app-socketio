@@ -9,11 +9,20 @@ const useForm = (initialValues: Record<string, any>) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const { name, files } = e.target;
+
+    const file = files?.[0];
+    if (!file) return;
+
+    setFormData((prev) => ({ ...prev, [name]: file }));
+  };
+
   const resetForm = () => {
     setFormData(initialValues);
   };
 
-  return { formData, setFormData, handleChange, resetForm };
+  return { formData, setFormData, handleChange, handleFileChange, resetForm };
 };
 
 export { useForm };
