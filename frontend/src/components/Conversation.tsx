@@ -1,7 +1,7 @@
 import useMessageStore, { type MessagePayload } from "../stores/message.store";
 import { ImageIcon, Loader2Icon, SendIcon, XIcon } from "lucide-react";
 import CustomInput from "./CustomInput";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import useAuthStore from "../stores/auth.store";
 import MessagesLoader from "./loaders/MessagesLoader";
 import EmptyMessages from "./empty/EmptyMessages";
@@ -44,6 +44,12 @@ const Conversation = () => {
       if (imagePreview) URL.revokeObjectURL(imagePreview);
     };
   }, [imagePreview]);
+
+  const messageEndRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    messageEndRef.current?.scrollIntoView({ behavior: "instant" });
+  }, [selectedUserMessages]);
 
   return (
     <div className="h-full w-full flex flex-col">
@@ -127,6 +133,8 @@ const Conversation = () => {
               </div>
             );
           })}
+
+          <div ref={messageEndRef} />
         </div>
       )}
 
