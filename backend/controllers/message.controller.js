@@ -79,6 +79,8 @@ export const getMessagesByUserId = async (req, res) => {
   }
 
   try {
+    const limit = 15;
+
     const result = await db.query(
       `
       SELECT id, sender_id, receiver_id, content, image_url, image_path, created_at
@@ -89,18 +91,20 @@ export const getMessagesByUserId = async (req, res) => {
        receiver_id = $1 AND sender_id = $2
       )
       ORDER BY created_at DESC, id DESC
-      LIMIT 15;
+      LIMIT $3;
       `,
-      [user.id, userId],
+      [user.id, userId, limit],
     );
 
     const messages = result.rows.reverse();
 
+    const hasMore = result.rows.length === limit;
     const last = messages[0];
 
     res.status(200).json({
       messages,
-      nextCursor: last ? { created_at: last.created_at, id: last.id } : null,
+      nextCursor:
+        hasMore && last ? { created_at: last.created_at, id: last.id } : null,
     });
   } catch (error) {
     console.error("getMessagesByUserId controller error:", error);
@@ -126,6 +130,8 @@ export const getNextMessagesByUserId = async (req, res) => {
   }
 
   try {
+    const limit = 15;
+
     const result = await db.query(
       `
       SELECT id, sender_id, receiver_id, content, image_url, image_path, created_at
@@ -140,18 +146,20 @@ export const getNextMessagesByUserId = async (req, res) => {
         OR (created_at = $3 AND id < $4)
       )
       ORDER BY created_at DESC, id DESC
-      LIMIT 15; 
+      LIMIT $5; 
       `,
-      [user.id, userId, created_at, cursorId],
+      [user.id, userId, created_at, cursorId, limit],
     );
 
     const messages = result.rows.reverse();
 
+    const hasMore = result.rows.length === 15;
     const last = messages[0];
 
     return res.status(200).json({
       messages,
-      nextCursor: last ? { created_at: last.created_at, id: last.id } : null,
+      nextCursor:
+        hasMore && last ? { created_at: last.created_at, id: last.id } : null,
     });
   } catch (error) {
     console.error("getNextMessagesByUserId controller error:", error);
