@@ -1,10 +1,11 @@
-import useMessageStore from "../stores/message.store";
+import useMessageStore, { type MessagePayload } from "../stores/message.store";
 import { ImageIcon, Loader2Icon, SendIcon, XIcon } from "lucide-react";
 import CustomInput from "./CustomInput";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ChangeEvent } from "react";
 import useAuthStore from "../stores/auth.store";
 import MessagesLoader from "./loaders/MessagesLoader";
 import EmptyMessages from "./empty/EmptyMessages";
+import { useForm } from "../hooks/useForm";
 
 const Conversation = () => {
   const {
@@ -13,23 +14,43 @@ const Conversation = () => {
     fetchInitialMessagesByUserId,
     fetchingInitialMessages,
     selectedUserMessages,
+    sendMessage,
     sendingMessage,
   } = useMessageStore();
   const { user } = useAuthStore();
 
-  const [messagePayload, setMessagePayload] = useState<{
-    text: string;
-    image: File | undefined;
-  }>({
+  const {
+    formData: messagePayload,
+    setFormData: setMessagePayload,
+    handleChange,
+    handleFileChange,
+    resetForm,
+  } = useForm({
     text: "",
     image: undefined,
   });
+
+  const [imagePreview, setImagePreview] = useState<string>("");
+
+  const handleSubmit = (e: any) => {
+    e.preventDefault();
+    sendMessage(messagePayload as MessagePayload);
+
+    resetForm();
+    setImagePreview("");
+  };
 
   if (!selectedUser) return null;
 
   useEffect(() => {
     fetchInitialMessagesByUserId(selectedUser.id);
-  }, []);
+  }, [selectedUser]);
+
+  useEffect(() => {
+    return () => {
+      if (imagePreview) URL.revokeObjectURL(imagePreview);
+    };
+  }, [imagePreview]);
 
   return (
     <div className="h-full w-full flex flex-col">
@@ -72,7 +93,7 @@ const Conversation = () => {
       ) : (
         <div className="flex-1 overflow-y-auto px-6 py-4 space-y-3">
           {selectedUserMessages.map((msg) => {
-            const isSender = msg.senderId === user?.id;
+            const isSender = msg.sender_id === user?.id;
 
             return (
               <div
@@ -116,19 +137,56 @@ const Conversation = () => {
         </div>
       )}
 
+      {/* Image Preview */}
+      {imagePreview && (
+        <div className="px-6 pb-2">
+          <div className="relative w-24 h-24 border border-gray-200 rounded-md overflow-hidden">
+            <img src={imagePreview} className="w-full h-full object-cover" />
+
+            <button
+              className="absolute top-1 right-1 w-5 h-5 bg-white rounded-full flex items-center justify-center shadow cursor-pointer"
+              onClick={() => {
+                setImagePreview("");
+                setMessagePayload((prev) => ({ ...prev, image: undefined }));
+              }}
+            >
+              <XIcon size={14} className="text-gray-500 hover:text-black" />
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Input Section */}
-      <div className="h-16 border-t px-6 border-gray-200 flex items-center space-x-4">
-        <button className="h-10 w-10 bg-blue-100 text-blue-500 flex items-center justify-center rounded-md cursor-pointer">
+      <form
+        onSubmit={handleSubmit}
+        className="h-16 border-t px-6 border-gray-200 flex items-center space-x-4"
+      >
+        <input
+          type="file"
+          accept="image/*"
+          className="hidden"
+          id="image-upload"
+          name="image"
+          onChange={(e) => {
+            handleFileChange(e);
+            const file = e.target.files?.[0];
+            if (!file) return;
+            setImagePreview(URL.createObjectURL(file));
+          }}
+        />
+
+        <label
+          htmlFor="image-upload"
+          className="h-10 w-10 bg-blue-100 text-blue-500 flex items-center justify-center rounded-md cursor-pointer"
+        >
           <ImageIcon className="h-full" />
-        </button>
+        </label>
         <div className="flex-1">
           <CustomInput
             placeholder="Type message here..."
             id="text"
             value={messagePayload.text}
-            onChange={(e) =>
-              setMessagePayload((prev) => ({ ...prev, text: e.target.value }))
-            }
+            onChange={handleChange}
             disabled={sendingMessage}
             required={false}
           />
@@ -140,7 +198,7 @@ const Conversation = () => {
             <Loader2Icon className="h-full animate-spin" />
           )}
         </button>
-      </div>
+      </form>
     </div>
   );
 };
