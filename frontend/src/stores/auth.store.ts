@@ -4,6 +4,7 @@ import { toast } from "react-toastify";
 import { validateSignin, validateSignup } from "../validators/auth.validator";
 import { capitalize } from "../utils/capitalize";
 import useMessageStore from "./message.store";
+import { io } from "socket.io-client";
 
 export interface User {
   id: string;
@@ -30,6 +31,9 @@ export interface SignupInputs extends SigninInputs {
   cPassword: string;
 }
 
+const BASE_URL =
+  import.meta.env.MODE === "production" ? "/" : "http://localhost:3000";
+
 interface AuthState {
   user: User | null;
 
@@ -39,6 +43,9 @@ interface AuthState {
   socket: Record<any, any> | null;
   onlineUsers: string[];
 
+  connectSocket: () => Promise<void>;
+  disconnectSocket: () => Promise<void>;
+
   checkAuth: () => Promise<void>;
   signup: (signupInputs: SignupInputs) => Promise<void>;
   login: (signinInputs: SigninInputs) => Promise<void>;
@@ -46,7 +53,7 @@ interface AuthState {
   updateUserProfile: (original: User, modified: UserWithImage) => Promise<void>;
 }
 
-const useAuthStore = create<AuthState>((set) => ({
+const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
 
   checkingAuth: false,
@@ -55,12 +62,32 @@ const useAuthStore = create<AuthState>((set) => ({
   socket: null,
   onlineUsers: [],
 
+  connectSocket: async () => {
+    const { user } = get();
+
+    if (!user || get().socket?.connected) return;
+
+    const socket = io(BASE_URL, { withCredentials: true });
+    socket.connect();
+    set({ socket });
+
+    socket.on("getOnlineUsers", (userIds: string[]) => {
+      set({ onlineUsers: userIds });
+    });
+  },
+
+  disconnectSocket: async () => {
+    const { socket } = get();
+    if (socket?.connected) socket.disconnect();
+  },
+
   checkAuth: async () => {
     set({ checkingAuth: true });
 
     try {
       const res = await axios.get("/auth/profile");
       set({ user: res.data.user ?? null });
+      get().connectSocket();
     } catch (error) {
       console.error("checkAuth error:", error);
     } finally {
@@ -91,6 +118,7 @@ const useAuthStore = create<AuthState>((set) => ({
         ...n,
       });
       set({ user: res.data.user ?? null });
+      get().connectSocket();
       toast.success(res.data.message || "Signup successful");
     } catch (error: any) {
       console.error("signup error:", error);
@@ -118,6 +146,7 @@ const useAuthStore = create<AuthState>((set) => ({
         password,
       });
       set({ user: res.data.user ?? null });
+      get().connectSocket();
       toast.success(res.data.message || "Login successful");
     } catch (error: any) {
       console.error("login error:", error);
@@ -134,6 +163,7 @@ const useAuthStore = create<AuthState>((set) => ({
       await axios.post("auth/logout");
       toast.success("Logout successful");
       set({ user: null });
+      get().disconnectSocket();
       useMessageStore.getState().resetMessageState();
     } catch (error: any) {
       console.error("logout error:", error);
