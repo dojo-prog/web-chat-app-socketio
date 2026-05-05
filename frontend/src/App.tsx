@@ -8,6 +8,7 @@ import NotFoundPage from "./pages/NotFoundPage";
 import { Slide, ToastContainer } from "react-toastify";
 import useAuthStore from "./stores/auth.store";
 import { useEffect } from "react";
+import ProfilePage from "./pages/ProfilePage";
 
 const App = () => {
   const { user, checkAuth, checkingAuth } = useAuthStore();
@@ -27,6 +28,7 @@ const App = () => {
           element={user ? <MainLayout /> : <Navigate to={"/auth"} />}
         >
           <Route index element={<ChatPage />} />
+          <Route path={"profile"} element={<ProfilePage />} />
         </Route>
 
         <Route
