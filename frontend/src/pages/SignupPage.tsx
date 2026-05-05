@@ -3,6 +3,7 @@ import CustomButton from "../components/CustomButton";
 import CustomInput from "../components/CustomInput";
 import { useForm } from "../hooks/useForm";
 import useAuthStore, { type SignupInputs } from "../stores/auth.store";
+import authImage from "../assets/images/auth-image.png";
 
 const SignupPage = () => {
   const { signup, loading } = useAuthStore();
@@ -24,7 +25,26 @@ const SignupPage = () => {
   return (
     <div className="h-full w-full flex">
       {/* Left Section */}
-      <div className="w-1/2 bg-blue-500"></div>
+      <div className="w-1/2 bg-linear-to-br from-blue-500 to-blue-900 flex flex-col justify-center items-center px-12 text-white">
+        {/* Image */}
+        <img
+          src={authImage}
+          alt="auth_visual"
+          className="w-[80%] max-w-md mb-8 drop-shadow-xl"
+        />
+
+        {/* Text Content */}
+        <div className="text-center space-y-4">
+          <h1 className="text-4xl font-bold leading-tight">
+            Start Your Journey Today
+          </h1>
+
+          <p className="text-blue-100 text-sm max-w-md">
+            Create your account and begin chatting instantly. Connect, share,
+            and stay in touch with people who matter.
+          </p>
+        </div>
+      </div>
 
       {/* Right Section */}
       <div className="w-1/2 px-10 flex flex-col items-center justify-center">
