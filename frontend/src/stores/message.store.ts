@@ -2,6 +2,7 @@ import { create } from "zustand";
 import type { User } from "./auth.store";
 import axios from "../lib/axios";
 import { toast } from "react-toastify";
+import { socket } from "../lib/socket";
 
 export interface Message {
   id: string;
@@ -32,6 +33,8 @@ interface MessageState {
   selectedUser: User | null;
   setSelectedUser: (user: User | null) => void;
 
+  initSocketListeners: () => void;
+
   fetchAllUsers: () => Promise<void>;
   fetchUserContacts: () => Promise<void>;
   fetchInitialMessagesByUserId: (userId: string) => Promise<void>;
@@ -60,6 +63,24 @@ const useMessageStore = create<MessageState>((set, get) => ({
     if (user) {
       get().fetchInitialMessagesByUserId(user.id);
     }
+  },
+
+  initSocketListeners: () => {
+    socket.off("new_message");
+
+    socket.on("new_message", (message: Message) => {
+      const { selectedUser } = get();
+
+      if (
+        selectedUser &&
+        (message.sender_id === selectedUser.id ||
+          message.receiver_id === selectedUser.id)
+      ) {
+        set((state) => ({
+          selectedUserMessages: [...state.selectedUserMessages, message],
+        }));
+      }
+    });
   },
 
   fetchAllUsers: async () => {
@@ -162,12 +183,9 @@ const useMessageStore = create<MessageState>((set, get) => ({
         formData.append("image", message.image);
       }
 
-      const res = await axios.post(`/messages/${selectedUser.id}`, formData, {
+      await axios.post(`/messages/${selectedUser.id}`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
-      set((state) => ({
-        selectedUserMessages: [...state.selectedUserMessages, res.data.message],
-      }));
     } catch (error: any) {
       console.error("sendMessage error:", error);
       toast.error(
