@@ -4,7 +4,7 @@ import { toast } from "react-toastify";
 import { validateSignin, validateSignup } from "../validators/auth.validator";
 import { capitalize } from "../utils/capitalize";
 import useMessageStore from "./message.store";
-import { io } from "socket.io-client";
+import { socket } from "../lib/socket";
 
 export interface User {
   id: string;
@@ -31,20 +31,14 @@ export interface SignupInputs extends SigninInputs {
   cPassword: string;
 }
 
-const BASE_URL =
-  import.meta.env.MODE === "production" ? "/" : "http://localhost:3000";
-
 interface AuthState {
   user: User | null;
 
   checkingAuth: boolean;
   loading: boolean;
 
-  socket: Record<any, any> | null;
   onlineUsers: string[];
-
   connectSocket: () => Promise<void>;
-  disconnectSocket: () => Promise<void>;
 
   checkAuth: () => Promise<void>;
   signup: (signupInputs: SignupInputs) => Promise<void>;
@@ -59,26 +53,21 @@ const useAuthStore = create<AuthState>((set, get) => ({
   checkingAuth: false,
   loading: false,
 
-  socket: null,
   onlineUsers: [],
-
   connectSocket: async () => {
     const { user } = get();
 
-    if (!user || get().socket?.connected) return;
+    if (!user || socket.connected) return;
 
-    const socket = io(BASE_URL, { withCredentials: true });
     socket.connect();
-    set({ socket });
+
+    socket.off("getOnlineUsers");
 
     socket.on("getOnlineUsers", (userIds: string[]) => {
       set({ onlineUsers: userIds });
     });
-  },
 
-  disconnectSocket: async () => {
-    const { socket } = get();
-    if (socket?.connected) socket.disconnect();
+    useMessageStore.getState().initSocketListeners();
   },
 
   checkAuth: async () => {
@@ -162,8 +151,8 @@ const useAuthStore = create<AuthState>((set, get) => ({
     try {
       await axios.post("auth/logout");
       toast.success("Logout successful");
+      socket.disconnect();
       set({ user: null });
-      get().disconnectSocket();
       useMessageStore.getState().resetMessageState();
     } catch (error: any) {
       console.error("logout error:", error);
