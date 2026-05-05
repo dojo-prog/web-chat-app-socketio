@@ -1,4 +1,5 @@
 import type { User } from "../stores/auth.store";
+import useAuthStore from "../stores/auth.store";
 import useMessageStore from "../stores/message.store";
 
 interface ChatUserCardProps {
@@ -7,6 +8,9 @@ interface ChatUserCardProps {
 
 const ChatUserCard = ({ user: u }: ChatUserCardProps) => {
   const { setSelectedUser } = useMessageStore();
+  const { onlineUsers } = useAuthStore();
+
+  const userOnline = onlineUsers.includes(u.id);
 
   return (
     <div
@@ -27,17 +31,25 @@ const ChatUserCard = ({ user: u }: ChatUserCardProps) => {
         )}
       </div>
       <div className="flex-1">
-        <div className="flex items-center justify-between mb-1">
-          <h2 className="text-sm font-semibold">{u.fname + " " + u.lname}</h2>
-          <p className="text-xs text-gray-500">12/21/26</p>
+        <div className="flex items-center mb-1">
+          <h2 className="text-sm font-semibold mr-2">
+            {u.fname + " " + u.lname}
+          </h2>
+          <p
+            className={`text-xs ${userOnline ? "text-green-500 font-bold" : "text-gray-400"}`}
+          >
+            {userOnline ? "Online" : "Offline"}
+          </p>
         </div>
-        <div>
-          <p className="text-xs text-gray-400 line-clamp-1">
+        <div className="flex">
+          {/* TODO LAST MESSAGE FUNC */}
+          <p className="flex-1 text-xs text-gray-400 line-clamp-1">
             Lorem ipsum dolor sit amet consectetur, adipisicing elit. Distinctio
             beatae ex impedit, maiores ratione debitis doloribus nam excepturi
             quos reiciendis consectetur iusto quam quo tempora, molestiae at
             dolorem illum placeat!
           </p>
+          <p className="text-xs text-gray-400 ml-1">12/21/26</p>
         </div>
       </div>
     </div>
