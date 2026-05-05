@@ -32,7 +32,7 @@ const NavBar = () => {
         >
           <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center mr-2">
             {user?.avatar_url ? (
-              <img src="" alt="" />
+              <img src={user?.avatar_url} alt={user?.fname} />
             ) : (
               <h2 className="font-bold text-blue-700">
                 {user?.fname[0] + user?.lname[0]!}
