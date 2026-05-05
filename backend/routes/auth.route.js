@@ -11,6 +11,7 @@ import {
   validateLogin,
   validateSignup,
 } from "../middlewares/auth.validation.js";
+import multerUpload from "../middlewares/multer.middleware.js";
 
 const router = express.Router();
 
@@ -18,6 +19,11 @@ router.get("/profile", protectRoute, getUserProfile);
 router.post("/signup", validateSignup, signup);
 router.post("/login", validateLogin, login);
 router.post("/logout", logout);
-router.put("/update-profile", protectRoute, updateProfile);
+router.put(
+  "/update-profile",
+  protectRoute,
+  multerUpload.single("image"),
+  updateProfile,
+);
 
 export default router;
