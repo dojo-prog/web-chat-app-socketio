@@ -187,16 +187,24 @@ const useAuthStore = create<AuthState>((set, get) => ({
       return;
     }
 
-    const nModified = {
-      fname: capitalize(modified.fname),
-      lname: capitalize(modified.lname),
-    };
-
     set({ loading: true });
     try {
-      const res = await axios.put("/auth/update-profile", {
-        original,
-        modified: { ...modified, ...nModified },
+      const formData = new FormData();
+
+      if (changes.fname) {
+        formData.append("fname", capitalize(changes.fname));
+      }
+
+      if (changes.lname) {
+        formData.append("lname", capitalize(changes.lname));
+      }
+
+      if (modified.image) {
+        formData.append("image", modified.image);
+      }
+
+      const res = await axios.put("/auth/update-profile", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
       });
       set({ user: res.data.user ?? null });
       toast.success(res.data.message ?? "Profile updated");

@@ -99,25 +99,24 @@ export const logout = async (req, res) => {
 
 export const updateProfile = async (req, res) => {
   const user = req.user;
-  const { original, modified } = req.body;
+  const { fname, lname } = req.body;
+  const file = req.file;
 
   try {
     const changes = {};
 
-    ["fname", "lname"].forEach((key) => {
-      if (original[key] !== modified[key]) {
-        changes[key] = modified[key];
-      }
-    });
-
-    if (Object.keys(changes).length === 0 && !modified.image) {
-      return res.status(400).json({ message: "No changes has been made" });
+    if (fname && fname !== user.fname) {
+      changes.fname = fname;
     }
 
-    // Image Change
-    if (modified.image) {
+    if (lname && lname !== user.lname) {
+      changes.lname = lname;
+    }
+
+    // Image upload
+    if (file) {
       const upload = await uploadImage(
-        modified.image,
+        file,
         "user-avatars",
         "user-avatars",
         user.id,
@@ -126,17 +125,18 @@ export const updateProfile = async (req, res) => {
       changes.avatar_url = upload.publicUrl;
       changes.avatar_path = upload.imagePath;
 
-      if (user.image_path) {
-        await deleteImage(user.image_path, "user-avatars");
+      if (user.avatar_path) {
+        await deleteImage(user.avatar_path, "user-avatars");
       }
     }
 
-    // Build Dynamic SET clause
+    if (Object.keys(changes).length === 0) {
+      return res.status(400).json({ message: "No changes has been made" });
+    }
+
     const keys = Object.keys(changes);
 
-    const setClause = keys
-      .map((key, index) => `${key} = $${index + 1}`)
-      .join(", ");
+    const setClause = keys.map((key, i) => `${key} = $${i + 1}`).join(", ");
 
     const values = keys.map((key) => changes[key]);
     values.push(user.id);
@@ -151,13 +151,13 @@ export const updateProfile = async (req, res) => {
       values,
     );
 
-    const user = result.rows[0];
-    const { password, ...rest } = user;
-
-    res.status(200).json({ message: "Profile updated", user: rest });
+    res.status(200).json({
+      message: "Profile updated",
+      user: result.rows[0],
+    });
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: "Server Error" });
+    console.error("updateProfile error:", error);
+    res.status(500).json({ message: "Server Error" });
   }
 };
 
