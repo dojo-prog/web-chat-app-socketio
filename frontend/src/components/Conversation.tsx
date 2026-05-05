@@ -40,6 +40,8 @@ const Conversation = () => {
 
     resetForm();
     setImagePreview("");
+
+    messageInputRef.current?.focus();
   };
 
   useEffect(() => {
@@ -73,6 +75,11 @@ const Conversation = () => {
   }, [selectedUserMessages]);
 
   const userOnline = onlineUsers.includes(selectedUser!.id);
+
+  const messageInputRef = useRef<HTMLInputElement | null>(null);
+  useEffect(() => {
+    messageInputRef.current?.focus();
+  }, [selectedUserMessages]);
 
   return (
     <div className="h-full w-full flex flex-col">
@@ -222,6 +229,7 @@ const Conversation = () => {
         </label>
         <div className="flex-1">
           <CustomInput
+            ref={messageInputRef}
             placeholder="Type message here..."
             id="text"
             value={messagePayload.text}
